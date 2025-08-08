@@ -1,0 +1,41 @@
+# Core dependencies for PM Analysis Tool
+
+# Configuration and data handling
+PyYAML>=6.0
+pandas>=1.5.0
+openpyxl>=3.1.0
+
+# Microsoft Project file handling
+# Note: mpxj requires Java runtime environment
+py4j>=0.10.9
+
+# Command-line interface
+click>=8.1.0
+
+# Enhanced console output and progress bars
+rich>=13.0.0
+
+# Optional: Word document processing (if needed for future extensions)
+python-docx>=0.8.11
+
+# Optional: Data visualization for reports
+matplotlib>=3.6.0
+plotly>=5.15.0
+
+# Optional: Template-based report generation
+Jinja2>=3.1.0
+
+# Development and testing dependencies
+pytest>=7.0.0
+pytest-cov>=4.0.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Windows-specific dependencies (for MPP file handling)
+# Uncomment if running on Windows and need pywin32 support
+# pywin32>=306; sys_platform == "win32"
+
+# Additional utilities
+pathlib2>=2.3.7; python_version < "3.4"
+typing-extensions>=4.0.0; python_version < "3.8"
