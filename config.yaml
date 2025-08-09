@@ -1,2 +1,67 @@
-# Default configuration file
-# This file will be implemented in a later task
+# PM Analysis Tool Configuration File
+# This file contains all configuration settings for the PM Analysis Tool
+
+# Project settings
+project:
+  name: "PM Analysis Project"
+  default_path: "./project_files"
+
+# Required documents configuration
+# Each document specifies patterns to match, supported formats, and whether it's required
+required_documents:
+  - name: "Project Charter"
+    patterns: ["*charter*", "*project*charter*"]
+    formats: ["md", "docx"]
+    required: true
+    
+  - name: "Scope Statement"
+    patterns: ["*scope*", "*project*scope*"]
+    formats: ["md", "docx"]
+    required: true
+    
+  - name: "Risk Management Plan"
+    patterns: ["*risk*", "*risk*management*"]
+    formats: ["md", "docx"]
+    required: true
+    
+  - name: "Work Breakdown Structure"
+    patterns: ["*wbs*", "*work*breakdown*", "*breakdown*structure*"]
+    formats: ["md", "docx"]
+    required: true
+    
+  - name: "Roadmap"
+    patterns: ["*roadmap*", "*timeline*", "*schedule*"]
+    formats: ["md", "docx", "mpp"]
+    required: true
+    
+  - name: "Stakeholder Register"
+    patterns: ["*stakeholder*", "*stakeholder*register*"]
+    formats: ["xlsx", "csv"]
+    required: true
+
+# Operation modes configuration
+modes:
+  document_check:
+    enabled: true
+    output_formats: ["markdown", "console"]
+    
+  status_analysis:
+    enabled: true
+    output_formats: ["markdown", "excel"]
+    include_charts: true
+    
+  learning_module:
+    enabled: true
+    content_path: "./learning/modules"
+
+# Output settings
+output:
+  directory: "./reports"
+  timestamp_files: true
+  overwrite_existing: false
+
+# Logging configuration
+logging:
+  level: "INFO"
+  file: "pm_analysis.log"
+  console: true

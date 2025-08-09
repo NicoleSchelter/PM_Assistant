@@ -232,6 +232,36 @@ class ModeRecommendation:
 
 
 @dataclass
+class ValidationResult:
+    """
+    Result of validating a file or data structure.
+    
+    This dataclass represents the outcome of validation operations,
+    including whether the validation passed and any issues found.
+    """
+    is_valid: bool
+    errors: List[str] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)
+    
+    def add_error(self, error_message: str) -> None:
+        """Add an error message and mark validation as failed."""
+        self.errors.append(error_message)
+        self.is_valid = False
+    
+    def add_warning(self, warning_message: str) -> None:
+        """Add a warning message."""
+        self.warnings.append(warning_message)
+    
+    def has_errors(self) -> bool:
+        """Check if validation has any errors."""
+        return len(self.errors) > 0
+    
+    def has_warnings(self) -> bool:
+        """Check if validation has any warnings."""
+        return len(self.warnings) > 0
+
+
+@dataclass
 class ProjectStatus:
     """
     Overall project status and health metrics.
