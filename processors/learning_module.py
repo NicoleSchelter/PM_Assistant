@@ -13,6 +13,8 @@ import re
 from processors.base_processor import BaseProcessor
 from core.models import FileInfo, ProcessingResult
 from file_handlers.markdown_handler import MarkdownHandler
+from learning.content_loader import ContentLoader
+from learning.presenter import Presenter
 from utils.logger import get_logger
 from utils.exceptions import FileProcessingError
 
@@ -46,6 +48,10 @@ class LearningModuleProcessor(BaseProcessor):
         
         # Initialize markdown handler for content processing
         self.markdown_handler = MarkdownHandler()
+        
+        # Initialize content loader and presenter
+        self.content_loader = ContentLoader()
+        self.presenter = Presenter()
         
         # Default learning content paths
         self.default_content_paths = [
@@ -118,13 +124,20 @@ class LearningModuleProcessor(BaseProcessor):
                 relevant_topics
             )
             
+            # Wrap in expected structure for compatibility
+            result_data = {
+                "learning_content": formatted_content,
+                "recommendations": recommendations,
+                "relevant_topics": relevant_topics
+            }
+            
             processing_time = time.time() - start_time
             logger.info(f"Learning module content generated in {processing_time:.2f} seconds")
             
             return ProcessingResult(
                 success=True,
                 operation="learning_module",
-                data=formatted_content,
+                data=result_data,
                 processing_time_seconds=processing_time
             )
             
@@ -190,7 +203,7 @@ class LearningModuleProcessor(BaseProcessor):
     
     def _load_learning_content(self, content_path: str, relevant_topics: List[str]) -> Dict[str, Any]:
         """
-        Load learning content from markdown files.
+        Load learning content from markdown files using ContentLoader.
         
         Args:
             content_path: Path to learning content directory
@@ -199,24 +212,7 @@ class LearningModuleProcessor(BaseProcessor):
         Returns:
             Dictionary containing loaded learning content
         """
-        learning_content = {
-            "topics": {},
-            "general_guidance": [],
-            "templates": [],
-            "examples": []
-        }
-        
-        content_dir = Path(content_path)
-        
-        # Try to load content from configured path
-        if content_dir.exists() and content_dir.is_dir():
-            learning_content.update(self._load_content_from_directory(content_dir, relevant_topics))
-        else:
-            logger.warning(f"Learning content directory not found: {content_path}")
-            # Fall back to default content
-            learning_content.update(self._get_default_learning_content(relevant_topics))
-        
-        return learning_content
+        return self.content_loader.load_content(content_path, relevant_topics)
     
     def _load_content_from_directory(self, content_dir: Path, relevant_topics: List[str]) -> Dict[str, Any]:
         """
@@ -665,7 +661,7 @@ Project management is the application of knowledge, skills, tools, and technique
                                 recommendations: List[str], 
                                 relevant_topics: List[str]) -> Dict[str, Any]:
         """
-        Format learning content for user-friendly presentation.
+        Format learning content for user-friendly presentation using Presenter.
         
         Args:
             learning_content: Raw learning content
@@ -675,36 +671,7 @@ Project management is the application of knowledge, skills, tools, and technique
         Returns:
             Formatted content structure
         """
-        formatted_content = {
-            "learning_overview": {
-                "relevant_topics": [
-                    {
-                        "key": topic,
-                        "title": self.learning_categories.get(topic, topic.replace("_", " ").title()),
-                        "available": topic in learning_content["topics"]
-                    }
-                    for topic in relevant_topics
-                ],
-                "total_topics": len(relevant_topics),
-                "content_sources": len(learning_content["general_guidance"]) + len(learning_content["topics"])
-            },
-            "topic_content": {},
-            "general_guidance": learning_content["general_guidance"],
-            "templates": learning_content["templates"],
-            "examples": learning_content["examples"],
-            "personalized_recommendations": recommendations,
-            "quick_tips": self._get_quick_tips(),
-            "additional_resources": self._get_additional_resources()
-        }
-        
-        # Format topic content
-        for topic_key, topic_content in learning_content["topics"].items():
-            formatted_content["topic_content"][topic_key] = {
-                "title": self.learning_categories.get(topic_key, topic_key.replace("_", " ").title()),
-                "content": topic_content
-            }
-        
-        return formatted_content
+        return self.presenter.present_learning_content(learning_content, recommendations, relevant_topics)
     
     def _get_quick_tips(self) -> List[str]:
         """Get quick project management tips."""

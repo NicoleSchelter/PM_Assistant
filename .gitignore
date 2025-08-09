@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+.env
+
+# Sonstiges
+.DS_Store
+
+Thumbs.db
+# Ignoriere den kompletten Ordner 
+

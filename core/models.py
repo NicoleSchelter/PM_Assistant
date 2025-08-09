@@ -48,6 +48,7 @@ class DocumentType(Enum):
     ROADMAP = "roadmap"
     STATUS_REPORT = "status_report"
     CHARTER = "charter"
+    PROJECT_CHARTER = "project_charter"  # Alias for charter
     REQUIREMENTS = "requirements"
     UNKNOWN = "unknown"
 
@@ -60,20 +61,62 @@ class FileInfo:
     This dataclass contains metadata about files found during project scanning,
     including their location, format, type, and processing status.
     """
-    path: Path
-    format: FileFormat
-    document_type: DocumentType
-    size_bytes: int
-    last_modified: datetime
+    path: Union[Path, str]
+    format: Optional[FileFormat] = None
+    document_type: Optional[DocumentType] = None
+    size_bytes: int = 0
+    last_modified: Optional[datetime] = None
     is_readable: bool = True
     processing_status: ProcessingStatus = ProcessingStatus.NOT_STARTED
     error_message: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
     
+    # Backward compatibility fields
+    name: Optional[str] = None
+    file_format: Optional[str] = None
+    
     def __post_init__(self) -> None:
         """Validate and normalize file information after initialization."""
         if not isinstance(self.path, Path):
             self.path = Path(self.path)
+        
+        # Handle backward compatibility
+        if self.name is None:
+            self.name = self.path.name
+        
+        if self.file_format is not None and self.format is None:
+            # Convert string format to enum
+            format_mapping = {
+                'md': FileFormat.MARKDOWN,
+                'xlsx': FileFormat.EXCEL,
+                'xls': FileFormat.EXCEL_LEGACY,
+                'mpp': FileFormat.MICROSOFT_PROJECT,
+                'yaml': FileFormat.YAML,
+                'json': FileFormat.JSON,
+                'csv': FileFormat.CSV
+            }
+            self.format = format_mapping.get(self.file_format, FileFormat.MARKDOWN)
+        
+        if self.format is None:
+            # Infer format from file extension
+            ext = self.path.suffix.lower().lstrip('.')
+            format_mapping = {
+                'md': FileFormat.MARKDOWN,
+                'xlsx': FileFormat.EXCEL,
+                'xls': FileFormat.EXCEL_LEGACY,
+                'mpp': FileFormat.MICROSOFT_PROJECT,
+                'yaml': FileFormat.YAML,
+                'yml': FileFormat.YAML,
+                'json': FileFormat.JSON,
+                'csv': FileFormat.CSV
+            }
+            self.format = format_mapping.get(ext, FileFormat.MARKDOWN)
+        
+        if self.document_type is None:
+            self.document_type = DocumentType.UNKNOWN
+        
+        if self.last_modified is None:
+            self.last_modified = datetime.now()
         
         # Ensure size is non-negative
         if self.size_bytes < 0:
