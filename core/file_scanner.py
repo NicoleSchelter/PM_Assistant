@@ -23,9 +23,10 @@ from core.models import (
 )
 from utils.exceptions import FileProcessingError, ValidationError
 from utils.validators import validate_directory_path
+from utils.logger import get_logger
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class FileScanner:

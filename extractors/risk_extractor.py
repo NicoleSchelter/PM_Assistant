@@ -15,10 +15,11 @@ from core.domain import Risk, RiskPriority, RiskStatus
 from file_handlers.base_handler import BaseFileHandler
 from file_handlers.markdown_handler import MarkdownHandler
 from file_handlers.excel_handler import ExcelHandler
-from utils.exceptions import DataExtractionError
+from utils.exceptions import DataExtractionError, FileProcessingError
 from utils.validators import validate_probability, validate_date_string
+from utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class RiskExtractor:

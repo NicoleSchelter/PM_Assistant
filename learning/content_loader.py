@@ -10,7 +10,8 @@ from pathlib import Path
 import re
 
 from utils.logger import get_logger
-from utils.exceptions import FileProcessingError
+from utils.exceptions import FileProcessingError, DataExtractionError
+from utils.error_handling import handle_errors, safe_execute, ErrorAggregator
 
 logger = get_logger(__name__)
 

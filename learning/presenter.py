@@ -9,6 +9,8 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 from utils.logger import get_logger
+from utils.exceptions import DataExtractionError
+from utils.error_handling import handle_errors, safe_execute
 
 logger = get_logger(__name__)
 

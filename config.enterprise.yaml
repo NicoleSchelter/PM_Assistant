@@ -1,0 +1,291 @@
+# PM Analysis Tool - Enterprise Configuration
+# This configuration is optimized for large enterprise projects
+# with comprehensive document requirements and advanced features.
+
+# Enterprise project settings
+project:
+  name: "Enterprise Project Analysis"
+  default_path: "./enterprise_project"
+  description: "Comprehensive enterprise project management analysis"
+  owner: "Enterprise PMO"
+
+# Comprehensive document requirements for enterprise projects
+required_documents:
+  # Core project documents
+  - name: "Project Charter"
+    patterns: ["*charter*", "*project*charter*", "charter*"]
+    formats: ["md", "docx", "pdf"]
+    required: true
+    description: "Foundational project authorization document"
+    
+  - name: "Business Case"
+    patterns: ["*business*case*", "*justification*"]
+    formats: ["md", "docx", "pdf"]
+    required: true
+    description: "Business justification and ROI analysis"
+    
+  - name: "Project Scope Statement"
+    patterns: ["*scope*", "*project*scope*"]
+    formats: ["md", "docx"]
+    required: true
+    description: "Detailed project scope definition"
+    
+  # Planning documents
+  - name: "Work Breakdown Structure"
+    patterns: ["*wbs*", "*work*breakdown*", "*deliverables*"]
+    formats: ["md", "docx", "xlsx", "mpp"]
+    required: true
+    description: "Hierarchical project deliverable structure"
+    
+  - name: "Project Schedule"
+    patterns: ["*schedule*", "*timeline*", "*roadmap*", "*plan*"]
+    formats: ["mpp", "xlsx", "md"]
+    required: true
+    description: "Detailed project timeline and dependencies"
+    
+  - name: "Resource Management Plan"
+    patterns: ["*resource*", "*staffing*", "*team*plan*"]
+    formats: ["md", "docx", "xlsx"]
+    required: true
+    description: "Resource allocation and management strategy"
+    
+  # Risk and quality management
+  - name: "Risk Management Plan"
+    patterns: ["*risk*", "*risk*management*", "*risk*register*"]
+    formats: ["md", "docx", "xlsx"]
+    required: true
+    description: "Risk identification and mitigation strategy"
+    
+  - name: "Quality Management Plan"
+    patterns: ["*quality*", "*qa*", "*quality*assurance*"]
+    formats: ["md", "docx"]
+    required: true
+    description: "Quality standards and assurance processes"
+    
+  # Communication and stakeholder management
+  - name: "Stakeholder Register"
+    patterns: ["*stakeholder*", "*stakeholder*register*"]
+    formats: ["xlsx", "csv"]
+    required: true
+    description: "Comprehensive stakeholder information"
+    
+  - name: "Communication Plan"
+    patterns: ["*communication*", "*comms*"]
+    formats: ["md", "docx", "xlsx"]
+    required: true
+    description: "Project communication strategy and methods"
+    
+  # Procurement and change management
+  - name: "Procurement Management Plan"
+    patterns: ["*procurement*", "*vendor*", "*contract*"]
+    formats: ["md", "docx"]
+    required: false
+    description: "Vendor and procurement management strategy"
+    
+  - name: "Change Management Plan"
+    patterns: ["*change*management*", "*change*control*"]
+    formats: ["md", "docx"]
+    required: false
+    description: "Change control and management procedures"
+    
+  # Governance and compliance
+  - name: "Project Governance Plan"
+    patterns: ["*governance*", "*steering*committee*"]
+    formats: ["md", "docx"]
+    required: false
+    description: "Project governance structure and processes"
+    
+  - name: "Compliance Documentation"
+    patterns: ["*compliance*", "*audit*", "*regulatory*"]
+    formats: ["md", "docx", "pdf"]
+    required: false
+    description: "Regulatory and compliance requirements"
+
+# Advanced operation modes
+modes:
+  document_check:
+    enabled: true
+    output_formats: ["markdown", "excel", "console"]
+    validate_structure: true
+    detailed_missing_reports: true
+    check_duplicates: true
+    compliance_checking: true
+    
+  status_analysis:
+    enabled: true
+    output_formats: ["markdown", "excel"]
+    include_charts: true
+    executive_summary: true
+    risk_analysis: true
+    milestone_tracking: true
+    stakeholder_analysis: true
+    resource_utilization_analysis: true
+    budget_analysis: true
+    extraction_confidence_threshold: 0.8
+    
+  learning_module:
+    enabled: true
+    content_path: "./learning/modules"
+    interactive_mode: true
+    include_examples: true
+    enterprise_modules: true
+
+# Enterprise output settings
+output:
+  directory: "./enterprise_reports"
+  timestamp_files: true
+  overwrite_existing: false
+  filename_template: "{project_name}_analysis_{mode}_{timestamp}"
+  include_raw_data: true
+  compress_large_reports: true
+  compression_threshold_mb: 5
+  executive_summary: true
+  detailed_appendices: true
+
+# Advanced file processing
+file_processing:
+  max_file_size_mb: 100
+  skip_binary_files: true
+  text_encoding: "utf-8"
+  parallel_processing: true
+  max_workers: 8
+  processing_timeout: 60
+  enable_ocr: true  # For scanned documents
+  
+# Enterprise MPP processing
+mpp_processing:
+  enabled: true
+  java_heap_size: "2g"
+  fallback_methods: ["xml_conversion", "text_extraction", "manual_parsing"]
+  extract_resources: true
+  extract_dependencies: true
+  extract_baselines: true
+  extract_custom_fields: true
+
+# Advanced extraction settings
+extraction:
+  risks:
+    confidence_threshold: 0.8
+    extract_mitigation: true
+    extract_owners: true
+    extract_probability_distributions: true
+    extract_impact_analysis: true
+    
+  deliverables:
+    confidence_threshold: 0.8
+    extract_dependencies: true
+    extract_assignments: true
+    extract_acceptance_criteria: true
+    extract_quality_metrics: true
+    
+  milestones:
+    confidence_threshold: 0.9
+    extract_dependencies: true
+    include_baseline_dates: true
+    extract_critical_path: true
+    extract_float_analysis: true
+    
+  stakeholders:
+    confidence_threshold: 0.8
+    extract_contact_info: true
+    extract_influence_levels: true
+    extract_communication_preferences: true
+    extract_engagement_strategies: true
+    
+  resources:
+    confidence_threshold: 0.7
+    extract_allocation_percentages: true
+    extract_skill_requirements: true
+    extract_cost_information: true
+    
+  budget:
+    confidence_threshold: 0.8
+    extract_cost_categories: true
+    extract_budget_baselines: true
+    extract_variance_analysis: true
+
+# Enterprise logging
+logging:
+  level: "INFO"
+  file: "pm_analysis_enterprise.log"
+  console: true
+  max_file_size_mb: 50
+  backup_count: 10
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
+  include_traces: true
+  audit_logging: true
+
+# Advanced enterprise settings
+advanced:
+  enable_caching: true
+  cache_directory: "./.enterprise_cache"
+  cache_expiration_hours: 48
+  experimental_features: true
+  plugin_directory: "./enterprise_plugins"
+  memory_limit_mb: 4096
+  enable_distributed_processing: true
+  
+# Enterprise reporting
+reports:
+  include_metadata: true
+  custom_header: "CONFIDENTIAL - Enterprise Project Analysis"
+  custom_footer: "Generated by PM Analysis Tool - Enterprise Edition"
+  color_scheme: "professional"
+  show_confidence_scores: true
+  language: "en"
+  include_executive_dashboard: true
+  include_trend_analysis: true
+  include_predictive_analytics: true
+
+# Enterprise integrations
+integrations:
+  export:
+    json_export: true
+    csv_export: true
+    xml_export: true
+    api_export: true
+    
+  webhooks:
+    enabled: true
+    completion_url: "https://enterprise.company.com/pm-analysis/completion"
+    error_url: "https://enterprise.company.com/pm-analysis/error"
+    
+  databases:
+    enabled: true
+    connection_string: "postgresql://user:pass@localhost/pm_analysis"
+    
+  active_directory:
+    enabled: true
+    domain: "ENTERPRISE"
+    
+  sharepoint:
+    enabled: true
+    site_url: "https://company.sharepoint.com/sites/pmo"
+
+# Enterprise validation
+validation:
+  strict_mode: true
+  min_completeness_score: 0.8
+  require_all_mandatory_documents: true
+  enforce_naming_conventions: true
+  validate_document_versions: true
+  check_approval_signatures: true
+  
+  custom_rules:
+    - name: "Budget Approval Required"
+      condition: "budget > 1000000"
+      requirement: "budget_approval_document"
+    - name: "Executive Sponsor Required"
+      condition: "duration > 12_months"
+      requirement: "executive_sponsor_assignment"
+    - name: "Risk Assessment Mandatory"
+      condition: "risk_score > 7"
+      requirement: "detailed_risk_assessment"
+
+# Security settings for enterprise
+security:
+  encrypt_sensitive_data: true
+  mask_personal_information: true
+  audit_all_access: true
+  require_authentication: true
+  session_timeout_minutes: 30

@@ -15,10 +15,12 @@ from core.domain import Stakeholder, StakeholderInfluence, StakeholderInterest
 from file_handlers.base_handler import BaseFileHandler
 from file_handlers.markdown_handler import MarkdownHandler
 from file_handlers.excel_handler import ExcelHandler
-from utils.exceptions import DataExtractionError
+from utils.exceptions import DataExtractionError, FileProcessingError
 from utils.validators import validate_email, validate_phone_number
+from utils.logger import get_logger
+from utils.error_handling import handle_errors, safe_execute, ErrorAggregator
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class StakeholderExtractor:

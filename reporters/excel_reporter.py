@@ -17,6 +17,11 @@ from openpyxl.chart import BarChart, PieChart, Reference
 from reporters.base_reporter import BaseReporter
 from core.models import ProcessingResult, ProjectStatus
 from core.domain import Risk, Deliverable, Milestone, Stakeholder
+from utils.logger import get_logger
+from utils.exceptions import ReportGenerationError, FileProcessingError
+from utils.error_handling import handle_errors, error_context, safe_execute
+
+logger = get_logger(__name__)
 
 
 class ExcelReporter(BaseReporter):

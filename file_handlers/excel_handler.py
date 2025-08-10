@@ -14,9 +14,10 @@ from openpyxl.utils.exceptions import InvalidFileException
 
 from file_handlers.base_handler import BaseFileHandler
 from core.models import ValidationResult, FileFormat
-from utils.exceptions import FileProcessingError, ValidationError
+from utils.exceptions import FileProcessingError, ValidationError, DataExtractionError
+from utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ExcelHandler(BaseFileHandler):

@@ -16,7 +16,8 @@ from file_handlers.markdown_handler import MarkdownHandler
 from learning.content_loader import ContentLoader
 from learning.presenter import Presenter
 from utils.logger import get_logger
-from utils.exceptions import FileProcessingError
+from utils.exceptions import FileProcessingError, DataExtractionError
+from utils.error_handling import handle_errors, error_context, safe_execute
 
 logger = get_logger(__name__)
 

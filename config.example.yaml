@@ -1,0 +1,383 @@
+# PM Analysis Tool - Example Configuration File
+# This file demonstrates all available configuration options with detailed explanations.
+# Copy this file to 'config.yaml' and customize it for your project needs.
+
+# =============================================================================
+# PROJECT SETTINGS
+# =============================================================================
+project:
+  # Display name for your project (used in reports and output)
+  name: "Example PM Analysis Project"
+  
+  # Default directory to scan for project files when no --project-path is specified
+  # Can be absolute path or relative to the tool's location
+  default_path: "./sample_project"
+  
+  # Optional: Project description for reports
+  description: "Comprehensive analysis of project management documents"
+  
+  # Optional: Project manager or owner information
+  owner: "Project Management Office"
+
+# =============================================================================
+# REQUIRED DOCUMENTS CONFIGURATION
+# =============================================================================
+# Define which documents are required for your project and how to identify them
+required_documents:
+  
+  # Project Charter - Foundational project document
+  - name: "Project Charter"
+    # File name patterns to match (case-insensitive, supports wildcards)
+    patterns: 
+      - "*charter*"
+      - "*project*charter*"
+      - "charter*"
+    # Supported file formats for this document type
+    formats: ["md", "docx", "txt"]
+    # Whether this document is mandatory for complete project analysis
+    required: true
+    # Optional: Description of what this document should contain
+    description: "Defines project purpose, objectives, and high-level requirements"
+    
+  # Project Scope Statement - Defines project boundaries
+  - name: "Scope Statement"
+    patterns: 
+      - "*scope*"
+      - "*project*scope*"
+      - "scope*statement*"
+    formats: ["md", "docx", "txt"]
+    required: true
+    description: "Detailed description of project deliverables and boundaries"
+    
+  # Risk Management Plan - Risk identification and mitigation
+  - name: "Risk Management Plan"
+    patterns: 
+      - "*risk*"
+      - "*risk*management*"
+      - "*risk*plan*"
+      - "risk*register*"
+    formats: ["md", "docx", "xlsx", "csv"]
+    required: true
+    description: "Identifies, analyzes, and plans responses to project risks"
+    
+  # Work Breakdown Structure - Project deliverables hierarchy
+  - name: "Work Breakdown Structure"
+    patterns: 
+      - "*wbs*"
+      - "*work*breakdown*"
+      - "*breakdown*structure*"
+      - "*deliverables*"
+    formats: ["md", "docx", "xlsx"]
+    required: true
+    description: "Hierarchical decomposition of project deliverables"
+    
+  # Project Roadmap/Timeline - Project schedule and milestones
+  - name: "Roadmap"
+    patterns: 
+      - "*roadmap*"
+      - "*timeline*"
+      - "*schedule*"
+      - "*milestones*"
+    formats: ["md", "docx", "mpp", "xlsx"]
+    required: true
+    description: "Project timeline with key milestones and dependencies"
+    
+  # Stakeholder Register - Key project stakeholders
+  - name: "Stakeholder Register"
+    patterns: 
+      - "*stakeholder*"
+      - "*stakeholder*register*"
+      - "*stakeholders*"
+    formats: ["xlsx", "csv", "md"]
+    required: true
+    description: "List of project stakeholders with roles and contact information"
+    
+  # Optional documents (required: false)
+  - name: "Quality Management Plan"
+    patterns: 
+      - "*quality*"
+      - "*quality*management*"
+      - "*qa*plan*"
+    formats: ["md", "docx"]
+    required: false
+    description: "Defines quality standards and assurance processes"
+    
+  - name: "Communication Plan"
+    patterns: 
+      - "*communication*"
+      - "*communication*plan*"
+      - "*comms*plan*"
+    formats: ["md", "docx", "xlsx"]
+    required: false
+    description: "Defines communication methods and frequency"
+
+# =============================================================================
+# OPERATION MODES CONFIGURATION
+# =============================================================================
+modes:
+  
+  # Document Check Mode - Verifies document presence and structure
+  document_check:
+    # Enable/disable this mode
+    enabled: true
+    
+    # Output formats for this mode's reports
+    output_formats: ["markdown", "console"]
+    
+    # Check file structure and content validity
+    validate_structure: true
+    
+    # Generate detailed missing file reports
+    detailed_missing_reports: true
+    
+    # Check for duplicate files (same document type, different names)
+    check_duplicates: true
+    
+  # Status Analysis Mode - Extracts and analyzes project data
+  status_analysis:
+    enabled: true
+    output_formats: ["markdown", "excel"]
+    
+    # Include data visualization charts in reports (requires matplotlib/plotly)
+    include_charts: true
+    
+    # Generate executive summary section
+    executive_summary: true
+    
+    # Include risk analysis and trending
+    risk_analysis: true
+    
+    # Include milestone tracking and timeline analysis
+    milestone_tracking: true
+    
+    # Include stakeholder engagement analysis
+    stakeholder_analysis: true
+    
+    # Minimum confidence threshold for data extraction (0.0-1.0)
+    extraction_confidence_threshold: 0.7
+    
+  # Learning Module Mode - Provides PM education and best practices
+  learning_module:
+    enabled: true
+    
+    # Path to learning content directory (relative to tool location)
+    content_path: "./learning/modules"
+    
+    # Enable interactive learning mode (if supported)
+    interactive_mode: false
+    
+    # Include practical examples in learning content
+    include_examples: true
+    
+    # Learning modules to load (empty list = load all available)
+    modules: []  # Options: ["risk_management", "stakeholder_analysis", "scheduling"]
+
+# =============================================================================
+# OUTPUT SETTINGS
+# =============================================================================
+output:
+  # Directory for generated reports (created if doesn't exist)
+  directory: "./reports"
+  
+  # Add timestamp to report filenames to avoid overwrites
+  timestamp_files: true
+  
+  # Overwrite existing files with same name (if timestamp_files is false)
+  overwrite_existing: false
+  
+  # Report filename template (supports variables: {mode}, {timestamp}, {project_name})
+  filename_template: "analysis_report_{mode}_{timestamp}"
+  
+  # Include raw data exports in addition to formatted reports
+  include_raw_data: false
+  
+  # Compress large reports (zip format)
+  compress_large_reports: false
+  
+  # Maximum file size before compression (in MB)
+  compression_threshold_mb: 10
+
+# =============================================================================
+# FILE PROCESSING SETTINGS
+# =============================================================================
+file_processing:
+  
+  # Maximum file size to process (in MB, 0 = no limit)
+  max_file_size_mb: 50
+  
+  # Skip files that appear to be binary or corrupted
+  skip_binary_files: true
+  
+  # Encoding to use for text files (auto-detect if not specified)
+  text_encoding: "utf-8"
+  
+  # Enable parallel processing for multiple files
+  parallel_processing: true
+  
+  # Maximum number of worker threads for parallel processing
+  max_workers: 4
+  
+  # Timeout for processing individual files (in seconds)
+  processing_timeout: 30
+
+# =============================================================================
+# MICROSOFT PROJECT (.mpp) FILE SETTINGS
+# =============================================================================
+mpp_processing:
+  
+  # Enable Microsoft Project file processing
+  enabled: true
+  
+  # Java heap size for MPP processing (e.g., "512m", "1g")
+  java_heap_size: "512m"
+  
+  # Fallback methods if primary MPP processing fails
+  fallback_methods: ["xml_conversion", "text_extraction"]
+  
+  # Extract resource information from MPP files
+  extract_resources: true
+  
+  # Extract task dependencies and relationships
+  extract_dependencies: true
+
+# =============================================================================
+# DATA EXTRACTION SETTINGS
+# =============================================================================
+extraction:
+  
+  # Risk extraction settings
+  risks:
+    # Minimum confidence score for risk identification (0.0-1.0)
+    confidence_threshold: 0.6
+    
+    # Extract risk mitigation strategies
+    extract_mitigation: true
+    
+    # Extract risk ownership information
+    extract_owners: true
+    
+  # Deliverable extraction settings
+  deliverables:
+    confidence_threshold: 0.7
+    extract_dependencies: true
+    extract_assignments: true
+    
+  # Milestone extraction settings
+  milestones:
+    confidence_threshold: 0.8
+    extract_dependencies: true
+    include_baseline_dates: true
+    
+  # Stakeholder extraction settings
+  stakeholders:
+    confidence_threshold: 0.7
+    extract_contact_info: true
+    extract_influence_levels: true
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+logging:
+  # Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+  
+  # Log file name (relative to tool location)
+  file: "pm_analysis.log"
+  
+  # Also output logs to console
+  console: true
+  
+  # Maximum log file size before rotation (in MB)
+  max_file_size_mb: 10
+  
+  # Number of backup log files to keep
+  backup_count: 5
+  
+  # Log format string
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Include detailed error traces in logs
+  include_traces: true
+
+# =============================================================================
+# ADVANCED SETTINGS
+# =============================================================================
+advanced:
+  
+  # Cache processed file data to improve performance on repeated runs
+  enable_caching: true
+  
+  # Cache directory
+  cache_directory: "./.cache"
+  
+  # Cache expiration time (in hours)
+  cache_expiration_hours: 24
+  
+  # Enable experimental features (may be unstable)
+  experimental_features: false
+  
+  # Custom plugin directory for extending functionality
+  plugin_directory: "./plugins"
+  
+  # Memory usage limit (in MB, 0 = no limit)
+  memory_limit_mb: 1024
+
+# =============================================================================
+# REPORT CUSTOMIZATION
+# =============================================================================
+reports:
+  
+  # Include tool version and execution info in reports
+  include_metadata: true
+  
+  # Custom report header/footer
+  custom_header: ""
+  custom_footer: "Generated by PM Analysis Tool"
+  
+  # Color scheme for charts (if supported)
+  color_scheme: "default"  # Options: default, professional, colorblind
+  
+  # Include confidence scores in extracted data
+  show_confidence_scores: false
+  
+  # Language for report generation
+  language: "en"  # Currently only English supported
+
+# =============================================================================
+# INTEGRATION SETTINGS
+# =============================================================================
+integrations:
+  
+  # Export data to external systems
+  export:
+    # Enable JSON export for API integration
+    json_export: false
+    
+    # Enable CSV export for spreadsheet tools
+    csv_export: false
+    
+    # Enable XML export for other PM tools
+    xml_export: false
+  
+  # Webhook notifications (if supported)
+  webhooks:
+    enabled: false
+    completion_url: ""
+    error_url: ""
+
+# =============================================================================
+# VALIDATION RULES
+# =============================================================================
+validation:
+  
+  # Strict mode - fail if any required document is missing
+  strict_mode: false
+  
+  # Minimum project completeness score to proceed with status analysis (0.0-1.0)
+  min_completeness_score: 0.5
+  
+  # Custom validation rules (advanced users)
+  custom_rules: []
+
+# End of configuration file
+# For more information, see the README.md file or visit the project documentation.

@@ -1,0 +1,46 @@
+# PM Analysis Tool - Minimal Configuration
+# This is a minimal configuration file with only essential settings.
+# Use this as a starting point for simple project analysis.
+
+# Basic project settings
+project:
+  name: "My Project Analysis"
+  default_path: "./project_files"
+
+# Essential required documents only
+required_documents:
+  - name: "Project Charter"
+    patterns: ["*charter*"]
+    formats: ["md", "docx"]
+    required: true
+    
+  - name: "Risk Management Plan"
+    patterns: ["*risk*"]
+    formats: ["md", "xlsx"]
+    required: true
+    
+  - name: "Work Breakdown Structure"
+    patterns: ["*wbs*", "*breakdown*"]
+    formats: ["md", "xlsx"]
+    required: true
+
+# Simple mode configuration
+modes:
+  document_check:
+    enabled: true
+    output_formats: ["console"]
+  status_analysis:
+    enabled: true
+    output_formats: ["markdown"]
+  learning_module:
+    enabled: true
+
+# Basic output settings
+output:
+  directory: "./reports"
+  timestamp_files: true
+
+# Simple logging
+logging:
+  level: "INFO"
+  console: true

@@ -12,9 +12,10 @@ import logging
 
 from file_handlers.base_handler import BaseFileHandler
 from core.models import ValidationResult, DocumentType
-from utils.exceptions import FileProcessingError, ValidationError
+from utils.exceptions import FileProcessingError, ValidationError, DataExtractionError
+from utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MarkdownHandler(BaseFileHandler):

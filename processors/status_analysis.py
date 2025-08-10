@@ -19,6 +19,7 @@ from extractors.milestone_extractor import MilestoneExtractor
 from extractors.stakeholder_extractor import StakeholderExtractor
 from utils.logger import get_logger
 from utils.exceptions import FileProcessingError, DataExtractionError
+from utils.error_handling import handle_errors, error_context, ErrorAggregator
 
 logger = get_logger(__name__)
 

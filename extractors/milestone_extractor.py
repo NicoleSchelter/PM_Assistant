@@ -16,10 +16,12 @@ from file_handlers.base_handler import BaseFileHandler
 from file_handlers.markdown_handler import MarkdownHandler
 from file_handlers.excel_handler import ExcelHandler
 from file_handlers.mpp_handler import MPPHandler
-from utils.exceptions import DataExtractionError
+from utils.exceptions import DataExtractionError, FileProcessingError
 from utils.validators import validate_date_string
+from utils.logger import get_logger
+from utils.error_handling import handle_errors, safe_execute, ErrorAggregator
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MilestoneExtractor:
