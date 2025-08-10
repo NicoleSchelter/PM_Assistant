@@ -6,7 +6,7 @@ This script provides a simple way to install the PM Analysis Tool
 and make it available as a command-line tool.
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()

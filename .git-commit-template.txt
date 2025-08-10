@@ -1,0 +1,16 @@
+[ALLOW-TEST-CHANGE]
+
+Reason:
+<short explanation why the test needed a change>
+
+Spec reference:
+<link or ID of the relevant specification or ticket>
+
+Scope:
+<which modules or features are affected>
+
+Before:
+<brief description of behavior before the change>
+
+After:
+<brief description of behavior after the change>

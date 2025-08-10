@@ -6,9 +6,9 @@ interface for all report generators in the PM Analysis Tool.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Union
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 from core.models import ProcessingResult
 
@@ -16,42 +16,41 @@ from core.models import ProcessingResult
 class BaseReporter(ABC):
     """
     Abstract base class for report generators.
-    
+
     This class defines the interface that all reporters must implement
     to ensure consistent behavior across different output formats.
-    
+
     Attributes:
         reporter_name (str): Human-readable name for this reporter
         output_format (str): The output format this reporter generates
         file_extension (str): File extension for generated reports
     """
-    
+
     def __init__(self):
         """Initialize the reporter."""
         self.reporter_name: str = self.__class__.__name__
         self.output_format: str = "unknown"
         self.file_extension: str = ".txt"
-    
+
     @abstractmethod
-    def generate_report(self, 
-                       data: ProcessingResult, 
-                       output_path: str, 
-                       config: Dict[str, Any]) -> str:
+    def generate_report(
+        self, data: ProcessingResult, output_path: str, config: Dict[str, Any]
+    ) -> str:
         """
         Generate a report from the processing results.
-        
+
         Args:
             data (ProcessingResult): Results from a processor
             output_path (str): Path where the report should be saved
             config (Dict[str, Any]): Configuration for report generation
-            
+
         Returns:
             str: Path to the generated report file
-            
+
         Raises:
             ReportGenerationError: If report generation fails
             FileWriteError: If the report cannot be written to disk
-            
+
         Example:
             >>> reporter = MarkdownReporter()
             >>> result = ProcessingResult(success=True, data={...})
@@ -60,19 +59,19 @@ class BaseReporter(ABC):
             >>> print(f"Report generated: {report_path}")
         """
         pass
-    
+
     @abstractmethod
     def format_data(self, data: Dict[str, Any], config: Dict[str, Any]) -> str:
         """
         Format the data into the reporter's output format.
-        
+
         Args:
             data (Dict[str, Any]): Data to format
             config (Dict[str, Any]): Formatting configuration
-            
+
         Returns:
             str: Formatted data as a string
-            
+
         Example:
             >>> reporter = ExcelReporter()
             >>> data = {"risks": [...], "milestones": [...]}
@@ -80,48 +79,47 @@ class BaseReporter(ABC):
             >>> formatted = reporter.format_data(data, config)
         """
         pass
-    
+
     def validate_output_path(self, output_path: str) -> bool:
         """
         Validate that the output path is writable.
-        
+
         Args:
             output_path (str): Path to validate
-            
+
         Returns:
             bool: True if path is valid and writable
         """
         try:
             path = Path(output_path)
-            
+
             # Create directory if it doesn't exist
             if not path.exists():
                 path.mkdir(parents=True, exist_ok=True)
-            
+
             # Check if directory is writable
             test_file = path / "test_write.tmp"
             test_file.touch()
             test_file.unlink()
-            
+
             return True
         except (OSError, PermissionError):
             return False
-    
-    def generate_filename(self, 
-                         base_name: str, 
-                         timestamp: bool = True,
-                         suffix: Optional[str] = None) -> str:
+
+    def generate_filename(
+        self, base_name: str, timestamp: bool = True, suffix: Optional[str] = None
+    ) -> str:
         """
         Generate a filename for the report.
-        
+
         Args:
             base_name (str): Base name for the file
             timestamp (bool): Whether to include timestamp
             suffix (Optional[str]): Additional suffix to add
-            
+
         Returns:
             str: Generated filename with extension
-            
+
         Example:
             >>> reporter = MarkdownReporter()
             >>> filename = reporter.generate_filename("status_report", True, "v2")
@@ -129,109 +127,110 @@ class BaseReporter(ABC):
             "status_report_20240108_143022_v2.md"
         """
         parts = [base_name]
-        
+
         if timestamp:
             ts = datetime.now().strftime("%Y%m%d_%H%M%S")
             parts.append(ts)
-        
+
         if suffix:
             parts.append(suffix)
-        
+
         filename = "_".join(parts) + self.file_extension
         return filename
-    
-    def create_report_header(self, 
-                           title: str, 
-                           processing_result: ProcessingResult,
-                           config: Dict[str, Any]) -> Dict[str, Any]:
+
+    def create_report_header(
+        self, title: str, processing_result: ProcessingResult, config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Create standard header information for reports.
-        
+
         Args:
             title (str): Report title
             processing_result (ProcessingResult): Processing results
             config (Dict[str, Any]): Configuration
-            
+
         Returns:
             Dict[str, Any]: Header information
         """
         return {
-            'title': title,
-            'generated_at': datetime.now().isoformat(),
-            'generator': self.reporter_name,
-            'format': self.output_format,
-            'processing_success': processing_result.success,
-            'execution_time': processing_result.processing_time_seconds,
-            'errors_count': len(processing_result.errors),
-            'warnings_count': len(processing_result.warnings),
-            'config': config
+            "title": title,
+            "generated_at": datetime.now().isoformat(),
+            "generator": self.reporter_name,
+            "format": self.output_format,
+            "processing_success": processing_result.success,
+            "execution_time": processing_result.processing_time_seconds,
+            "errors_count": len(processing_result.errors),
+            "warnings_count": len(processing_result.warnings),
+            "config": config,
         }
-    
+
     def handle_processing_errors(self, processing_result: ProcessingResult) -> str:
         """
         Format processing errors for inclusion in reports.
-        
+
         Args:
             processing_result (ProcessingResult): Processing results with potential errors
-            
+
         Returns:
             str: Formatted error information
         """
         if not processing_result.errors and not processing_result.warnings:
             return ""
-        
+
         error_section = []
-        
+
         if processing_result.errors:
             error_section.append("## Errors")
             for i, error in enumerate(processing_result.errors, 1):
                 error_section.append(f"{i}. {error}")
             error_section.append("")
-        
+
         if processing_result.warnings:
             error_section.append("## Warnings")
             for i, warning in enumerate(processing_result.warnings, 1):
                 error_section.append(f"{i}. {warning}")
             error_section.append("")
-        
+
         return "\n".join(error_section)
-    
+
     def get_supported_config_options(self) -> Dict[str, Any]:
         """
         Get the configuration options supported by this reporter.
-        
+
         Returns:
             Dict[str, Any]: Supported configuration options with descriptions
         """
         return {
-            'include_timestamp': {
-                'type': bool,
-                'default': True,
-                'description': 'Include timestamp in filename'
+            "include_timestamp": {
+                "type": bool,
+                "default": True,
+                "description": "Include timestamp in filename",
             },
-            'include_errors': {
-                'type': bool,
-                'default': True,
-                'description': 'Include error section in report'
+            "include_errors": {
+                "type": bool,
+                "default": True,
+                "description": "Include error section in report",
             },
-            'template': {
-                'type': str,
-                'default': 'standard',
-                'description': 'Report template to use',
-                'options': ['standard', 'detailed', 'summary']
-            }
+            "template": {
+                "type": str,
+                "default": "standard",
+                "description": "Report template to use",
+                "options": ["standard", "detailed", "summary"],
+            },
         }
-    
+
     def __str__(self) -> str:
         """String representation of the reporter."""
         return f"{self.reporter_name} ({self.output_format})"
-    
+
     def __repr__(self) -> str:
         """Detailed string representation of the reporter."""
-        return (f"{self.__class__.__name__}("
-                f"reporter_name='{self.reporter_name}', "
-                f"output_format='{self.output_format}', "
-                f"file_extension='{self.file_extension}')")
+        return (
+            f"{self.__class__.__name__}("
+            f"reporter_name='{self.reporter_name}', "
+            f"output_format='{self.output_format}', "
+            f"file_extension='{self.file_extension}')"
+        )
 
 
 # Usage Example and Documentation

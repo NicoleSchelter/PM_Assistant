@@ -2,19 +2,33 @@
 Pytest configuration and shared fixtures for PM Analysis Tool tests.
 """
 
-import pytest
-from datetime import datetime, date
-from pathlib import Path
+from datetime import date, datetime
 from decimal import Decimal
+from pathlib import Path
 
-from core.models import (
-    FileInfo, ProcessingResult, ModeRecommendation, ProjectStatus,
-    OperationMode, FileFormat, ProcessingStatus, DocumentType
-)
+import pytest
+
 from core.domain import (
-    Risk, Deliverable, Milestone, Stakeholder,
-    RiskPriority, RiskStatus, DeliverableStatus, MilestoneStatus,
-    StakeholderInfluence, StakeholderInterest
+    Deliverable,
+    DeliverableStatus,
+    Milestone,
+    MilestoneStatus,
+    Risk,
+    RiskPriority,
+    RiskStatus,
+    Stakeholder,
+    StakeholderInfluence,
+    StakeholderInterest,
+)
+from core.models import (
+    DocumentType,
+    FileFormat,
+    FileInfo,
+    ModeRecommendation,
+    OperationMode,
+    ProcessingResult,
+    ProcessingStatus,
+    ProjectStatus,
 )
 
 
@@ -27,7 +41,7 @@ def sample_file_info():
         document_type=DocumentType.RISK_REGISTER,
         size_bytes=1024,
         last_modified=datetime(2024, 1, 15, 10, 30, 0),
-        is_readable=True
+        is_readable=True,
     )
 
 
@@ -39,7 +53,7 @@ def sample_processing_result():
         operation="file_processing",
         file_path=Path("test_file.xlsx"),
         data={"records": 10, "errors": 0},
-        processing_time_seconds=2.5
+        processing_time_seconds=2.5,
     )
 
 
@@ -52,10 +66,7 @@ def sample_mode_recommendation():
         reasoning="All required documents are available with good quality",
         available_documents=[DocumentType.RISK_REGISTER, DocumentType.WBS],
         missing_documents=[DocumentType.STAKEHOLDER_REGISTER],
-        file_quality_scores={
-            DocumentType.RISK_REGISTER: 0.95,
-            DocumentType.WBS: 0.8
-        }
+        file_quality_scores={DocumentType.RISK_REGISTER: 0.95, DocumentType.WBS: 0.8},
     )
 
 
@@ -74,7 +85,7 @@ def sample_project_status():
         completed_milestones=3,
         overdue_milestones=1,
         total_stakeholders=12,
-        key_stakeholder_engagement=0.8
+        key_stakeholder_engagement=0.8,
     )
 
 
@@ -94,7 +105,7 @@ def sample_risk():
         identified_date=date(2024, 1, 10),
         mitigation_strategy="Implement strict change control process",
         cost_impact=Decimal("50000.00"),
-        schedule_impact_days=14
+        schedule_impact_days=14,
     )
 
 
@@ -112,7 +123,7 @@ def sample_deliverable():
         due_date=date(2024, 2, 1),
         estimated_effort_hours=40.0,
         completion_percentage=60.0,
-        budget_allocated=Decimal("5000.00")
+        budget_allocated=Decimal("5000.00"),
     )
 
 
@@ -128,7 +139,7 @@ def sample_milestone():
         milestone_type="Approval",
         owner="Project Manager",
         approval_required=True,
-        approver="Sponsor"
+        approver="Sponsor",
     )
 
 
@@ -146,5 +157,5 @@ def sample_stakeholder():
         interest=StakeholderInterest.HIGH,
         is_decision_maker=True,
         is_sponsor=True,
-        engagement_strategy="Weekly status meetings and monthly reviews"
+        engagement_strategy="Weekly status meetings and monthly reviews",
     )

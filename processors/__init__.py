@@ -7,4 +7,4 @@ for the three main operation modes of the PM Analysis Tool.
 
 from .base_processor import BaseProcessor
 
-__all__ = ['BaseProcessor']
+__all__ = ["BaseProcessor"]

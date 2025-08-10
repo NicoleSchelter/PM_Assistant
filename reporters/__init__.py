@@ -7,4 +7,4 @@ for generating reports in different formats from processing results.
 
 from .base_reporter import BaseReporter
 
-__all__ = ['BaseReporter']
+__all__ = ["BaseReporter"]
