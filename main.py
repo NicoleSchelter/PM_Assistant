@@ -12,6 +12,10 @@ import time
 from pathlib import Path
 from typing import List, Optional
 
+# Add current directory to Python path for proper imports
+current_dir = Path(__file__).parent
+sys.path.insert(0, str(current_dir))
+
 import click
 from rich import print as rprint
 from rich.console import Console
@@ -21,10 +25,10 @@ from rich.prompt import Confirm
 from rich.table import Table
 from rich.text import Text
 
-from core.engine import PMAnalysisEngine
-from core.models import OperationMode, ProcessingResult
-from utils.exceptions import ConfigurationError, PMAnalysisError, ValidationError
-from utils.logger import get_logger
+from logic.orchestration.engine import PMAnalysisEngine
+from logic.models.models import OperationMode, ProcessingResult
+from ui.common.exceptions import ConfigurationError, PMAnalysisError, ValidationError
+from ui.common.logger import get_logger
 
 # Initialize console and logger
 # Use file parameter to ensure output is captured in tests

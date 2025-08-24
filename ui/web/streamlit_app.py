@@ -1,0 +1,147 @@
+
+import os
+import io
+import time
+from pathlib import Path
+from typing import List, Optional
+import sys
+
+# Add parent directories to path for imports
+parent_dir = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(parent_dir))
+
+import streamlit as st
+
+# Prefer relative imports so this file can live at repo root
+from logic.orchestration.engine import PMAnalysisEngine
+from logic.models.models import ProcessingResult
+from ui.common.exceptions import ValidationError
+
+APP_TITLE = "Minimal PM‑Assistent (Streamlit UI)"
+
+def save_uploaded_files(files, dest_dir: Path) -> list[Path]:
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    saved = []
+    for f in files or []:
+        # Keep original filename; ensure uniqueness
+        target = dest_dir / f.name
+        # If duplicate, add suffix
+        i = 1
+        while target.exists():
+            target = dest_dir / f"{target.stem}_{i}{target.suffix}"
+            i += 1
+        with open(target, "wb") as out:
+            out.write(f.getbuffer())
+        saved.append(target)
+    return saved
+
+def run_engine(engine: PMAnalysisEngine, mode: Optional[str], project_path: Path, output_formats: Optional[list[str]]):
+    # Normalize parameters for engine.run()
+    mode_value = mode if mode not in (None, "", "auto") else None
+    formats = output_formats if output_formats else None
+    return engine.run(mode=mode_value, project_path=str(project_path), output_formats=formats)
+
+def main():
+    st.set_page_config(page_title=APP_TITLE, layout="wide")
+    st.title(APP_TITLE)
+    st.caption("Grafische Oberfläche als Ersatz für die CLI `main.py` – wählt Modus, lädt Dateien und generiert Berichte.")
+
+    # Sidebar: configuration & status
+    with st.sidebar:
+        st.header("Konfiguration")
+        mode = st.selectbox(
+            "Modus",
+            options=["auto", "document-check", "status-analysis", "learning-module"],
+            index=0,
+            help="Auto erkennt den Modus anhand der vorhandenen Dateien.",
+        )
+        st.write("**Ausgabeformate**")
+        fmt_md = st.checkbox("Markdown", value=True)
+        fmt_xlsx = st.checkbox("Excel", value=False)
+        fmt_console = st.checkbox("Konsole (nur Anzeige)", value=False)
+        output_formats = [f for f, on in (("markdown", fmt_md), ("excel", fmt_xlsx), ("console", fmt_console)) if on]
+
+        st.divider()
+        st.subheader("Engine‑Status")
+        try:
+            engine = PMAnalysisEngine()
+            status = engine.get_engine_status()
+            proc_info = engine.get_processor_info()
+            st.json(status)
+            if proc_info:
+                with st.expander("Verfügbare Prozessoren"):
+                    st.json(proc_info)
+        except Exception as e:
+            st.error(f"Fehler beim Initialisieren der Engine: {e}")
+            return
+
+    st.subheader("Projektdateien")
+    st.write("Laden Sie die relevanten Dateien hoch (z. B. PDF/DOCX, MPP, XLSX). Alternativ können Sie einen existierenden Projektordner angeben.")
+    upload = st.file_uploader(
+        "Dateien hochladen",
+        accept_multiple_files=True,
+        help="Mehrfachauswahl möglich. Die Dateien werden in einen temporären Projektordner kopiert."
+    )
+
+    default_project_dir = Path("uploaded_project")
+    project_dir = st.text_input("Projektpfad (optional)", value=str(default_project_dir))
+
+    if st.button("Analyse starten", type="primary"):
+        project_path = Path(project_dir).expanduser().resolve()
+        saved = save_uploaded_files(upload, project_path)
+
+        with st.status("Starte Analyse …", expanded=True) as status_box:
+            try:
+                t0 = time.time()
+                result: ProcessingResult = run_engine(engine, mode, project_path, output_formats)
+                dt = time.time() - t0
+                st.write(f"⏱️ Dauer: {dt:.2f} s")
+
+                if not result.success:
+                    st.error(f"Analyse fehlgeschlagen ({result.operation}).")
+                else:
+                    st.success(f"Analyse abgeschlossen: {result.operation}")
+
+                # Show summary
+                st.write("### Zusammenfassung")
+                st.json({
+                    "operation": result.operation,
+                    "processing_time_seconds": getattr(result, "processing_time_seconds", None),
+                    "messages": getattr(result, "messages", None)
+                })
+
+                # If markdown/excel reporters wrote files, offer downloads from default locations
+                output_section = st.container()
+                with output_section:
+                    downloads = []
+                    out_dir = Path("outputs")
+                    if out_dir.exists():
+                        for p in sorted(out_dir.glob("*")):
+                            if p.is_file():
+                                downloads.append(p)
+
+                    if downloads:
+                        st.write("### Generierte Dateien")
+                        for p in downloads:
+                            with open(p, "rb") as fh:
+                                st.download_button(
+                                    label=f"Download {p.name}",
+                                    data=fh.read(),
+                                    file_name=p.name,
+                                    mime="application/octet-stream",
+                                )
+                    elif "markdown" in output_formats or "excel" in output_formats:
+                        st.info("Es wurden noch keine Ausgabedateien im Ordner `outputs/` gefunden. Prüfen Sie Reporter‑Konfiguration.")
+
+                status_box.update(label="Fertig", state="complete")
+            except ValidationError as ve:
+                status_box.update(label="Eingabefehler", state="error")
+                st.error(str(ve))
+            except Exception as e:
+                status_box.update(label="Fehler", state="error")
+                st.exception(e)
+
+    st.caption("Hinweis: Diese UI ruft intern `PMAnalysisEngine.run(mode, project_path, output_formats)` auf.")
+
+if __name__ == "__main__":
+    main()

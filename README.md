@@ -74,7 +74,28 @@ python main.py --version
 
 ## 🚀 Quick Start
 
-### Basic Usage
+### Interactive Mode (Recommended for New Users)
+The tool features a guided interactive mode that walks you through the entire analysis process:
+
+```bash
+# Start interactive mode (default when no parameters provided)
+python main_entry.py
+
+# Or explicitly request interactive mode
+python main_entry.py interactive
+```
+
+The interactive mode provides:
+- 🎯 **Guided Project Selection** - Choose and validate project directory
+- 📊 **Automatic Mode Detection** - Smart recommendations based on available files
+- 🎨 **Visual File Discovery** - See all discovered documents in formatted tables
+- 🔧 **Flexible Configuration** - Choose operation mode and output formats
+- 📈 **Real-time Progress** - Visual progress tracking during analysis
+- 🎯 **Next Steps Guidance** - Recommendations and action options after analysis
+
+For a complete interactive mode walkthrough, see [INTERACTIVE_MODE_DEMO.md](INTERACTIVE_MODE_DEMO.md).
+
+### Traditional CLI Mode
 ```bash
 # Auto-detect mode and analyze current directory
 python main.py
@@ -101,6 +122,17 @@ Copy and customize the default configuration:
 cp config.yaml my-config.yaml
 python main.py --config my-config.yaml
 ```
+
+## 🏗️ Architecture
+
+The PM Assistant follows a clean 4-layer architecture:
+
+- **UI Layer** (`ui/`) - User interfaces (CLI, Web)
+- **Logic Layer** (`logic/`) - Business logic and orchestration
+- **Service Layer** (`service/`) - Application services and processors
+- **Data Layer** (`data/`) - Data access and file handling
+
+For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## 📖 Usage Guide
 

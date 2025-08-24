@@ -2,15 +2,20 @@
 import os
 import io
 import time
+import sys
 from pathlib import Path
 from typing import List, Optional
 
+# Add current directory to Python path for proper imports
+current_dir = Path(__file__).parent
+sys.path.insert(0, str(current_dir))
+
 import streamlit as st
 
-# Prefer relative imports so this file can live at repo root
-from core.engine import PMAnalysisEngine
-from core.models import ProcessingResult
-from utils.exceptions import ValidationError
+# Import from new 4-layer architecture
+from logic.orchestration.engine import PMAnalysisEngine
+from logic.models.models import ProcessingResult
+from ui.common.exceptions import ValidationError
 
 APP_TITLE = "Minimal PM‑Assistent (Streamlit UI)"
 
@@ -59,15 +64,37 @@ def main():
         st.divider()
         st.subheader("Engine‑Status")
         try:
-            engine = PMAnalysisEngine()
-            status = engine.get_engine_status()
-            proc_info = engine.get_processor_info()
-            st.json(status)
-            if proc_info:
-                with st.expander("Verfügbare Prozessoren"):
-                    st.json(proc_info)
+            # Try to create engine with explicit error handling
+            @st.cache_resource
+            def create_engine():
+                try:
+                    from logic.orchestration.engine import PMAnalysisEngine
+                    engine = PMAnalysisEngine()
+                    return engine, None
+                except Exception as e:
+                    return None, str(e)
+            
+            engine, engine_error = create_engine()
+            
+            if engine_error:
+                st.error(f"Engine initialization failed: {engine_error}")
+                st.write("**Debug Info:**")
+                st.code(f"Error: {engine_error}")
+                return
+            elif engine is None:
+                st.error("Engine is None - unknown initialization error")
+                return
+            else:
+                status = engine.get_engine_status()
+                proc_info = engine.get_processor_info()
+                st.success(f"Engine initialized with {len(engine.processors)} processors")
+                st.json(status)
+                if proc_info:
+                    with st.expander("Verfügbare Prozessoren"):
+                        st.json(proc_info)
         except Exception as e:
             st.error(f"Fehler beim Initialisieren der Engine: {e}")
+            st.exception(e)
             return
 
     st.subheader("Projektdateien")
@@ -87,6 +114,16 @@ def main():
 
         with st.status("Starte Analyse …", expanded=True) as status_box:
             try:
+                # Get the cached engine
+                engine, engine_error = create_engine()
+                
+                if engine_error or engine is None:
+                    st.error(f"Engine nicht verfügbar: {engine_error or 'Unknown error'}")
+                    status_box.update(label="Engine-Fehler", state="error")
+                    return
+                
+                st.write(f"✓ Engine bereit mit {len(engine.processors)} Prozessoren")
+                
                 t0 = time.time()
                 result: ProcessingResult = run_engine(engine, mode, project_path, output_formats)
                 dt = time.time() - t0
@@ -94,8 +131,20 @@ def main():
 
                 if not result.success:
                     st.error(f"Analyse fehlgeschlagen ({result.operation}).")
+                    if hasattr(result, 'errors') and result.errors:
+                        st.write("**Fehlerdetails:**")
+                        for error in result.errors:
+                            st.code(error)
+                    status_box.update(label="Analyse fehlgeschlagen", state="error")
+                    return
                 else:
                     st.success(f"Analyse abgeschlossen: {result.operation}")
+                    
+                    # Show warnings if any
+                    if hasattr(result, 'warnings') and result.warnings:
+                        with st.expander(f"Warnungen ({len(result.warnings)})"):
+                            for warning in result.warnings:
+                                st.warning(warning)
 
                 # Show summary
                 st.write("### Zusammenfassung")
@@ -105,15 +154,19 @@ def main():
                     "messages": getattr(result, "messages", None)
                 })
 
-                # If markdown/excel reporters wrote files, offer downloads from default locations
+                # If markdown/excel reporters wrote files, offer downloads from configured output directory
                 output_section = st.container()
                 with output_section:
                     downloads = []
-                    out_dir = Path("outputs")
-                    if out_dir.exists():
-                        for p in sorted(out_dir.glob("*")):
-                            if p.is_file():
-                                downloads.append(p)
+                    
+                    # Check both configured output directory and default reports directory
+                    output_dirs = [Path("reports"), Path("outputs")]
+                    
+                    for out_dir in output_dirs:
+                        if out_dir.exists():
+                            for p in sorted(out_dir.glob("*")):
+                                if p.is_file() and p.name.endswith(('.md', '.xlsx', '.pdf', '.txt')):
+                                    downloads.append(p)
 
                     if downloads:
                         st.write("### Generierte Dateien")
@@ -126,7 +179,7 @@ def main():
                                     mime="application/octet-stream",
                                 )
                     elif "markdown" in output_formats or "excel" in output_formats:
-                        st.info("Es wurden noch keine Ausgabedateien im Ordner `outputs/` gefunden. Prüfen Sie Reporter‑Konfiguration.")
+                        st.info("Es wurden noch keine Ausgabedateien im Ordner reports/ oder outputs/ gefunden. Prüfen Sie Reporter‑Konfiguration.")
 
                 status_box.update(label="Fertig", state="complete")
             except ValidationError as ve:
