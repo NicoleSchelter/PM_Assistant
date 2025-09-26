@@ -43,7 +43,7 @@ required_documents:
 modes:
   document_check:
     enabled: true
-    output_formats: ["markdown", "console"]
+    output_formats: ["markdown"]
     
   status_analysis:
     enabled: true

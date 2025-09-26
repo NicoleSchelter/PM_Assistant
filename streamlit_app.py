@@ -66,8 +66,8 @@ def main():
         st.write("**Ausgabeformate**")
         fmt_md = st.checkbox("Markdown", value=True)
         fmt_xlsx = st.checkbox("Excel", value=False)
-        fmt_console = st.checkbox("Konsole (nur Anzeige)", value=False)
-        output_formats = [f for f, on in (("markdown", fmt_md), ("excel", fmt_xlsx), ("console", fmt_console)) if on]
+        # Note: "console" format is not supported by the engine, so we don't include it as an option
+        output_formats = [f for f, on in (("markdown", fmt_md), ("excel", fmt_xlsx)) if on]
 
         st.divider()
         st.subheader("Engine‑Status")

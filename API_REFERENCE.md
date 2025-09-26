@@ -70,7 +70,7 @@ result = engine.run(
 **Parameters:**
 - `mode` (str, optional): Operation mode. Options: "document-check", "status-analysis", "learning-module", or "auto"
 - `project_path` (str, optional): Path to project directory. Defaults to configured path
-- `output_formats` (list[str], optional): Output formats. Options: "markdown", "excel", "console"
+- `output_formats` (list[str], optional): Output formats. Options: "markdown", "excel"
 
 **Returns:**
 - `ProcessingResult`: Analysis results
@@ -475,7 +475,7 @@ Operation mode settings.
 modes:
   document_check:
     enabled: true
-    output_formats: ["markdown", "console"]
+    output_formats: ["markdown"]
   status_analysis:
     enabled: true
     output_formats: ["markdown", "excel"]

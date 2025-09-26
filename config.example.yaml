@@ -153,7 +153,7 @@ modes:
     enabled: true
     
     # Output formats for this mode's reports
-    output_formats: ["markdown", "console"]
+    output_formats: ["markdown"]
     
     # Check file structure and content validity
     validate_structure: true

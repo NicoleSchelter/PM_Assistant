@@ -264,7 +264,7 @@ class ConfigManager:
                 },
             ],
             "modes": {
-                "document_check": {"enabled": True, "output_formats": ["markdown", "console"]},
+                "document_check": {"enabled": True, "output_formats": ["markdown"]},
                 "status_analysis": {
                     "enabled": True,
                     "output_formats": ["markdown", "excel"],

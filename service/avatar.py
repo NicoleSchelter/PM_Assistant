@@ -30,7 +30,7 @@ class AvatarService:
         # Provider-specific configuration
         if self.provider == "did":
             self.did_config = self.config.get("did", {})
-            self.api_key = self.did_config.get("api_key", "")
+            self.api_key = self.did_config.get("dm9ud2FuZGhvZmVuQGdteC5kZQ:v0Z_I3oWP9Odb06hIGJ_K", "")
             self.avatar_id = self.did_config.get("avatar_id", "default")
             self.voice_id = self.did_config.get("voice_id", "en-US-JennyNeural")
         elif self.provider == "heygen":
