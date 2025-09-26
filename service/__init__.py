@@ -1,5 +1,5 @@
-"""
-Service Layer - Application Services
+"""Service layer package for PM Assistant."""
 
-This module contains application services, processors, and business operations.
-"""
+from .avatar import AvatarService
+
+__all__ = ["AvatarService"]

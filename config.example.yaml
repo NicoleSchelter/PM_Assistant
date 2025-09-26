@@ -20,6 +20,37 @@ project:
   owner: "Project Management Office"
 
 # =============================================================================
+# AVATAR SETTINGS
+# =============================================================================
+avatar:
+  # Enable avatar functionality in web interface
+  enabled: true
+  
+  # Avatar service provider: "did" for D-ID, "heygen" for HeyGen
+  provider: "did"
+  
+  # D-ID API settings (if provider is "did")
+  did:
+    # API key for D-ID service
+    api_key: "your-did-api-key-here"
+    # Default avatar ID to use
+    avatar_id: "default"
+    # Voice ID for speech synthesis
+    voice_id: "en-US-JennyNeural"
+    
+  # HeyGen API settings (if provider is "heygen")
+  heygen:
+    # API key for HeyGen service
+    api_key: "your-heygen-api-key-here"
+    # Default avatar ID to use
+    avatar_id: "default"
+    # Voice ID for speech synthesis
+    voice_id: "en-US-JennyNeural"
+    
+  # Default avatar greeting message
+  greeting: "Hello! I'm your project management assistant. How can I help you today?"
+
+# =============================================================================
 # REQUIRED DOCUMENTS CONFIGURATION
 # =============================================================================
 # Define which documents are required for your project and how to identify them

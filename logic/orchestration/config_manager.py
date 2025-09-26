@@ -153,6 +153,14 @@ class ConfigManager:
         """
         return self.config_data.get("project", {})
 
+    def get_avatar_config(self) -> Dict[str, Any]:
+        """Get avatar configuration section.
+
+        Returns:
+            Avatar configuration dictionary
+        """
+        return self.config_data.get("avatar", {})
+
     def get_required_documents(self) -> List[Dict[str, Any]]:
         """Get required documents configuration.
 
@@ -207,75 +215,37 @@ class ConfigManager:
         return mode_config.get("enabled", False)
 
     def _create_default_config(self) -> None:
-        """Create a default configuration file if none exists."""
-        default_config = self._get_default_config_data()
+        """Create a default configuration file from the example."""
+        example_config = Path(__file__).parent.parent.parent / "config.example.yaml"
+        default_config = Path(self.config_path)
 
-        try:
-            with open(self.config_path, "w", encoding="utf-8") as file:
-                yaml.dump(default_config, file, default_flow_style=False, indent=2)
-            logger.info(f"Created default configuration file: {self.config_path}")
-        except IOError as e:
-            raise ConfigurationError(f"Cannot create default config file: {e}")
+        if example_config.exists():
+            import shutil
+            shutil.copy(example_config, default_config)
+            logger.info(f"Created default config from example: {default_config}")
+        else:
+            # Create minimal config
+            default_content = """
+project:
+  name: "PM Analysis Project"
+  default_path: "./sample_project"
 
-    def _get_default_config_data(self) -> Dict[str, Any]:
-        """Get default configuration data structure.
+required_documents: []
 
-        Returns:
-            Default configuration dictionary
-        """
-        return {
-            "project": {"name": "PM Analysis Project", "default_path": "./project_files"},
-            "required_documents": [
-                {
-                    "name": "Project Charter",
-                    "patterns": ["*charter*", "*project*charter*"],
-                    "formats": ["md", "docx"],
-                    "required": True,
-                },
-                {
-                    "name": "Scope Statement",
-                    "patterns": ["*scope*", "*project*scope*"],
-                    "formats": ["md", "docx"],
-                    "required": True,
-                },
-                {
-                    "name": "Risk Management Plan",
-                    "patterns": ["*risk*", "*risk*management*"],
-                    "formats": ["md", "docx"],
-                    "required": True,
-                },
-                {
-                    "name": "Work Breakdown Structure",
-                    "patterns": ["*wbs*", "*work*breakdown*", "*breakdown*structure*"],
-                    "formats": ["md", "docx"],
-                    "required": True,
-                },
-                {
-                    "name": "Roadmap",
-                    "patterns": ["*roadmap*", "*timeline*", "*schedule*"],
-                    "formats": ["md", "docx", "mpp"],
-                    "required": True,
-                },
-                {
-                    "name": "Stakeholder Register",
-                    "patterns": ["*stakeholder*", "*stakeholder*register*"],
-                    "formats": ["xlsx", "csv"],
-                    "required": True,
-                },
-            ],
-            "modes": {
-                "document_check": {"enabled": True, "output_formats": ["markdown", "console"]},
-                "status_analysis": {
-                    "enabled": True,
-                    "output_formats": ["markdown", "excel"],
-                    "include_charts": True,
-                },
-                "learning_module": {"enabled": True, "content_path": "./learning/modules"},
-            },
-            "output": {
-                "directory": "./reports",
-                "timestamp_files": True,
-                "overwrite_existing": False,
-            },
-            "logging": {"level": "INFO", "file": "pm_analysis.log", "console": True},
-        }
+modes:
+  document_check:
+    enabled: true
+  status_analysis:
+    enabled: true
+  learning_module:
+    enabled: true
+
+output:
+  directory: "./reports"
+
+logging:
+  level: "INFO"
+"""
+            with open(default_config, "w", encoding="utf-8") as f:
+                f.write(default_content.strip())
+            logger.info(f"Created minimal default config: {default_config}")

@@ -1,374 +1,334 @@
-# API Reference
+# PM Analysis Tool - API Reference
 
-This document provides comprehensive API documentation for the PM Analysis Tool's core components and interfaces.
+This document provides detailed API documentation for the PM Analysis Tool, covering all public classes, methods, and configuration options.
 
-## Core Engine
+## Table of Contents
+
+1. [Core Classes](#core-classes)
+   - [PMAnalysisEngine](#pmanalysisengine)
+   - [ConfigManager](#configmanager)
+   - [AvatarService](#avatarservice)
+2. [Models](#models)
+   - [ProcessingResult](#processingresult)
+   - [OperationMode](#operationmode)
+3. [Processors](#processors)
+   - [BaseProcessor](#baseprocessor)
+   - [DocumentCheckProcessor](#documentcheckprocessor)
+   - [StatusAnalysisProcessor](#statusanalysisprocessor)
+   - [LearningModuleProcessor](#learningmoduleprocessor)
+4. [Reporters](#reporters)
+   - [BaseReporter](#basereporter)
+   - [MarkdownReporter](#markdownreporter)
+   - [ExcelReporter](#excelreporter)
+5. [File Handlers](#file-handlers)
+   - [BaseHandler](#basehandler)
+   - [MarkdownHandler](#markdownhandler)
+   - [ExcelHandler](#excelhandler)
+   - [MppHandler](#mpphandler)
+6. [Configuration](#configuration)
+   - [Configuration Options](#configuration-options)
+
+## Core Classes
 
 ### PMAnalysisEngine
 
-The main orchestrator class that coordinates all system components.
+The main engine class that orchestrates the analysis process.
 
 ```python
-from core.engine import PMAnalysisEngine
+from logic.orchestration.engine import PMAnalysisEngine
 
+# Initialize engine with default config
+engine = PMAnalysisEngine()
+
+# Initialize engine with custom config
 engine = PMAnalysisEngine(config_path="config.yaml")
-result = engine.run(mode=OperationMode.STATUS_ANALYSIS)
 ```
 
 #### Constructor
 
 ```python
-def __init__(self, config_path: Optional[str] = None)
+PMAnalysisEngine(config_path: Optional[str] = None)
 ```
 
 **Parameters:**
 - `config_path` (str, optional): Path to configuration file. Defaults to "config.yaml"
 
-**Raises:**
-- `ConfigurationError`: If configuration file is invalid or missing required settings
-
 #### Methods
 
 ##### run()
 
-```python
-def run(
-    self,
-    mode: Optional[OperationMode] = None,
-    project_path: Optional[str] = None,
-    output_formats: Optional[List[str]] = None
-) -> ProcessingResult
-```
+Execute the analysis process.
 
-Execute the analysis workflow.
-
-**Parameters:**
-- `mode` (OperationMode, optional): Operation mode to use. Auto-detected if not specified
-- `project_path` (str, optional): Path to project directory. Uses config default if not specified
-- `output_formats` (List[str], optional): Output formats for reports. Uses config default if not specified
-
-**Returns:**
-- `ProcessingResult`: Result object containing success status, data, errors, and warnings
-
-**Example:**
 ```python
 result = engine.run(
-    mode=OperationMode.STATUS_ANALYSIS,
+    mode="status-analysis",
     project_path="./my-project",
     output_formats=["markdown", "excel"]
 )
-
-if result.success:
-    print("Analysis completed successfully")
-    print(f"Reports generated: {result.data.get('reports', [])}")
-else:
-    print("Analysis failed:")
-    for error in result.errors:
-        print(f"  - {error}")
 ```
-
-##### detect_optimal_mode()
-
-```python
-def detect_optimal_mode(self, project_path: Optional[str] = None) -> ModeRecommendation
-```
-
-Analyze available files and recommend optimal operation mode.
 
 **Parameters:**
-- `project_path` (str, optional): Path to project directory
+- `mode` (str, optional): Operation mode. Options: "document-check", "status-analysis", "learning-module", or "auto"
+- `project_path` (str, optional): Path to project directory. Defaults to configured path
+- `output_formats` (list[str], optional): Output formats. Options: "markdown", "excel", "console"
 
 **Returns:**
-- `ModeRecommendation`: Recommendation object with mode, confidence, and reasoning
+- `ProcessingResult`: Analysis results
 
-**Example:**
+##### get_engine_status()
+
+Get engine status information.
+
 ```python
-recommendation = engine.detect_optimal_mode("./project")
-print(f"Recommended mode: {recommendation.recommended_mode}")
-print(f"Confidence: {recommendation.confidence_percentage}%")
-print(f"Reasoning: {recommendation.reasoning}")
+status = engine.get_engine_status()
 ```
 
-## Data Models
+**Returns:**
+- `dict`: Engine status information
 
-### Core Models
+##### get_processor_info()
 
-#### ProcessingResult
+Get information about available processors.
 
 ```python
-@dataclass
-class ProcessingResult:
-    success: bool
-    data: Dict[str, Any]
-    errors: List[str]
-    warnings: List[str]
-    execution_time: float
-    timestamp: datetime
+info = engine.get_processor_info()
 ```
 
-#### ModeRecommendation
+**Returns:**
+- `dict`: Processor information
+
+### ConfigManager
+
+Manages configuration loading and validation.
 
 ```python
-@dataclass
-class ModeRecommendation:
-    recommended_mode: OperationMode
-    confidence_percentage: float
-    reasoning: str
-    available_documents: List[DocumentType]
-    missing_documents: List[DocumentType]
-    alternative_modes: List[OperationMode]
+from logic.orchestration.config_manager import ConfigManager
+
+# Initialize with default config
+config_manager = ConfigManager()
+
+# Initialize with custom config
+config_manager = ConfigManager("my-config.yaml")
 ```
 
-#### FileInfo
+#### Constructor
 
 ```python
-@dataclass
-class FileInfo:
-    name: str
-    path: str
-    size_bytes: int
-    format: FileFormat
-    last_modified: datetime
-    is_readable: bool
-    document_type: Optional[DocumentType] = None
-    confidence_score: float = 0.0
+ConfigManager(config_path: Optional[str] = None)
 ```
 
-### Domain Models
+**Parameters:**
+- `config_path` (str, optional): Path to configuration file. Defaults to "config.yaml"
 
-#### Risk
+#### Methods
+
+##### load_config()
+
+Load configuration from file.
 
 ```python
-@dataclass
-class Risk:
-    id: str
-    description: str
-    probability: str
-    impact: str
-    status: RiskStatus
-    mitigation: str
-    owner: str
-    category: Optional[str] = None
-    due_date: Optional[datetime] = None
-    created_date: Optional[datetime] = None
-    last_updated: Optional[datetime] = None
+config = config_manager.load_config()
 ```
 
-**Example:**
+**Returns:**
+- `dict`: Configuration data
+
+##### get_project_config()
+
+Get project configuration.
+
 ```python
-risk = Risk(
-    id="R001",
-    description="Budget overrun due to scope changes",
-    probability="High",
-    impact="High",
-    status=RiskStatus.ACTIVE,
-    mitigation="Implement strict change control process",
-    owner="Project Manager"
+project_config = config_manager.get_project_config()
+```
+
+**Returns:**
+- `dict`: Project configuration
+
+##### get_avatar_config()
+
+Get avatar configuration.
+
+```python
+avatar_config = config_manager.get_avatar_config()
+```
+
+**Returns:**
+- `dict`: Avatar configuration
+
+##### get_required_documents()
+
+Get required documents configuration.
+
+```python
+docs = config_manager.get_required_documents()
+```
+
+**Returns:**
+- `list[dict]`: Required documents configuration
+
+##### get_modes_config()
+
+Get operation modes configuration.
+
+```python
+modes = config_manager.get_modes_config()
+```
+
+**Returns:**
+- `dict`: Modes configuration
+
+##### get_output_config()
+
+Get output configuration.
+
+```python
+output = config_manager.get_output_config()
+```
+
+**Returns:**
+- `dict`: Output configuration
+
+##### get_logging_config()
+
+Get logging configuration.
+
+```python
+logging = config_manager.get_logging_config()
+```
+
+**Returns:**
+- `dict`: Logging configuration
+
+##### get_project_path()
+
+Get default project path.
+
+```python
+path = config_manager.get_project_path()
+```
+
+**Returns:**
+- `str`: Default project path
+
+##### is_mode_enabled()
+
+Check if operation mode is enabled.
+
+```python
+enabled = config_manager.is_mode_enabled("status-analysis")
+```
+
+**Parameters:**
+- `mode` (str): Mode name to check
+
+**Returns:**
+- `bool`: True if mode is enabled
+
+### AvatarService
+
+Manages avatar functionality with D-ID or HeyGen services.
+
+```python
+from service.avatar import AvatarService
+
+# Initialize with configuration
+avatar_service = AvatarService(config)
+```
+
+#### Constructor
+
+```python
+AvatarService(config: dict)
+```
+
+**Parameters:**
+- `config` (dict): Configuration dictionary containing avatar settings
+
+#### Methods
+
+##### is_enabled()
+
+Check if avatar service is enabled and properly configured.
+
+```python
+enabled = avatar_service.is_enabled()
+```
+
+**Returns:**
+- `bool`: True if avatar service is enabled and configured
+
+##### get_avatar_html()
+
+Generate HTML for displaying the avatar.
+
+```python
+html = avatar_service.get_avatar_html(width=400, height=400)
+```
+
+**Parameters:**
+- `width` (int): Width of the avatar container
+- `height` (int): Height of the avatar container
+
+**Returns:**
+- `str`: HTML string for embedding the avatar
+
+##### speak()
+
+Make the avatar speak the given text.
+
+```python
+video_url = avatar_service.speak("Hello, welcome to the PM Assistant!")
+```
+
+**Parameters:**
+- `text` (str): Text for the avatar to speak
+
+**Returns:**
+- `str`: URL to the generated video/speech or None if failed
+
+## Models
+
+### ProcessingResult
+
+Represents the result of a processing operation.
+
+```python
+from logic.models.models import ProcessingResult
+
+result = ProcessingResult(
+    success=True,
+    operation="status-analysis",
+    messages=["Analysis completed successfully"],
+    data={"risks": [], "milestones": []}
 )
 ```
 
-#### Deliverable
+#### Attributes
+
+- `success` (bool): Whether the operation was successful
+- `operation` (str): Operation mode that was executed
+- `messages` (list[str]): Messages from the operation
+- `data` (dict): Processed data
+- `errors` (list[str], optional): Error messages if any
+- `warnings` (list[str], optional): Warning messages if any
+- `processing_time_seconds` (float, optional): Processing time in seconds
+
+### OperationMode
+
+Enumeration of available operation modes.
 
 ```python
-@dataclass
-class Deliverable:
-    id: str
-    name: str
-    description: str
-    status: DeliverableStatus
-    due_date: Optional[datetime] = None
-    completion_percentage: float = 0.0
-    assigned_to: Optional[str] = None
-    dependencies: List[str] = field(default_factory=list)
-    acceptance_criteria: List[str] = field(default_factory=list)
+from logic.models.models import OperationMode
+
+mode = OperationMode.DOCUMENT_CHECK
+mode = OperationMode.STATUS_ANALYSIS
+mode = OperationMode.LEARNING_MODULE
 ```
 
-#### Milestone
-
-```python
-@dataclass
-class Milestone:
-    id: str
-    name: str
-    date: datetime
-    status: MilestoneStatus
-    description: str
-    dependencies: List[str] = field(default_factory=list)
-    critical_path: bool = False
-    baseline_date: Optional[datetime] = None
-    variance_days: int = 0
-```
-
-#### Stakeholder
-
-```python
-@dataclass
-class Stakeholder:
-    name: str
-    role: str
-    contact: str
-    influence: str
-    interest: str
-    communication_preference: str
-    department: Optional[str] = None
-    engagement_strategy: Optional[str] = None
-```
-
-## File Handlers
-
-### BaseFileHandler
-
-Abstract base class for all file handlers.
-
-```python
-from file_handlers.base_handler import BaseFileHandler
-
-class CustomHandler(BaseFileHandler):
-    def can_handle(self, file_path: str) -> bool:
-        return file_path.lower().endswith('.custom')
-    
-    def extract_data(self, file_path: str) -> Dict[str, Any]:
-        # Implementation
-        pass
-    
-    def validate_structure(self, file_path: str) -> ValidationResult:
-        # Implementation
-        pass
-```
-
-#### Methods
-
-##### can_handle()
-
-```python
-@abstractmethod
-def can_handle(self, file_path: str) -> bool
-```
-
-Check if this handler can process the specified file.
-
-**Parameters:**
-- `file_path` (str): Path to the file to check
-
-**Returns:**
-- `bool`: True if handler can process the file, False otherwise
-
-##### extract_data()
-
-```python
-@abstractmethod
-def extract_data(self, file_path: str) -> Dict[str, Any]
-```
-
-Extract structured data from the file.
-
-**Parameters:**
-- `file_path` (str): Path to the file to process
-
-**Returns:**
-- `Dict[str, Any]`: Extracted data in structured format
-
-**Raises:**
-- `FileProcessingError`: If file cannot be processed
-- `DataExtractionError`: If data extraction fails
-
-##### validate_structure()
-
-```python
-@abstractmethod
-def validate_structure(self, file_path: str) -> ValidationResult
-```
-
-Validate file structure and content.
-
-**Parameters:**
-- `file_path` (str): Path to the file to validate
-
-**Returns:**
-- `ValidationResult`: Validation result with success status and messages
-
-### MarkdownHandler
-
-Handler for Markdown files.
-
-```python
-from file_handlers.markdown_handler import MarkdownHandler
-
-handler = MarkdownHandler()
-data = handler.extract_data("Risk Management Plan.md")
-```
-
-#### Methods
-
-##### extract_tables()
-
-```python
-def extract_tables(self, content: str) -> List[Dict[str, Any]]
-```
-
-Extract tables from Markdown content.
-
-**Parameters:**
-- `content` (str): Markdown content
-
-**Returns:**
-- `List[Dict[str, Any]]`: List of extracted tables with headers and rows
-
-##### extract_sections()
-
-```python
-def extract_sections(self, content: str) -> Dict[str, str]
-```
-
-Extract sections from Markdown content based on headers.
-
-**Parameters:**
-- `content` (str): Markdown content
-
-**Returns:**
-- `Dict[str, str]`: Dictionary mapping section titles to content
-
-### ExcelHandler
-
-Handler for Excel files.
-
-```python
-from file_handlers.excel_handler import ExcelHandler
-
-handler = ExcelHandler()
-data = handler.extract_data("Stakeholder_Register.xlsx")
-```
-
-#### Methods
-
-##### extract_sheet_data()
-
-```python
-def extract_sheet_data(self, file_path: str, sheet_name: Optional[str] = None) -> pd.DataFrame
-```
-
-Extract data from specific Excel sheet.
-
-**Parameters:**
-- `file_path` (str): Path to Excel file
-- `sheet_name` (str, optional): Name of sheet to extract. Uses first sheet if not specified
-
-**Returns:**
-- `pd.DataFrame`: Extracted data as pandas DataFrame
-
-##### get_sheet_names()
-
-```python
-def get_sheet_names(self, file_path: str) -> List[str]
-```
-
-Get list of sheet names in Excel file.
-
-**Parameters:**
-- `file_path` (str): Path to Excel file
-
-**Returns:**
-- `List[str]`: List of sheet names
+Values:
+- `DOCUMENT_CHECK`
+- `STATUS_ANALYSIS`
+- `LEARNING_MODULE`
 
 ## Processors
 
@@ -376,164 +336,27 @@ Get list of sheet names in Excel file.
 
 Abstract base class for all processors.
 
-```python
-from processors.base_processor import BaseProcessor
-
-class CustomProcessor(BaseProcessor):
-    def process(self, files: List[str], config: Dict) -> ProcessingResult:
-        # Implementation
-        pass
-    
-    def validate_inputs(self, files: List[str]) -> bool:
-        # Implementation
-        pass
-```
-
 #### Methods
 
 ##### process()
 
-```python
-@abstractmethod
-def process(self, files: List[str], config: Dict) -> ProcessingResult
-```
-
-Process files according to processor-specific logic.
-
-**Parameters:**
-- `files` (List[str]): List of file paths to process
-- `config` (Dict): Configuration dictionary
-
-**Returns:**
-- `ProcessingResult`: Processing result with success status and data
-
-##### validate_inputs()
+Process project files.
 
 ```python
-@abstractmethod
-def validate_inputs(self, files: List[str]) -> bool
+result = processor.process(project_path, config)
 ```
-
-Validate that required inputs are available for processing.
-
-**Parameters:**
-- `files` (List[str]): List of file paths to validate
-
-**Returns:**
-- `bool`: True if inputs are valid, False otherwise
 
 ### DocumentCheckProcessor
 
-Processor for document verification mode.
-
-```python
-from processors.document_check import DocumentCheckProcessor
-
-processor = DocumentCheckProcessor()
-result = processor.process(files, config)
-```
+Processor for document validation.
 
 ### StatusAnalysisProcessor
 
-Processor for status analysis mode.
+Processor for project status analysis.
 
-```python
-from processors.status_analysis import StatusAnalysisProcessor
+### LearningModuleProcessor
 
-processor = StatusAnalysisProcessor()
-result = processor.process(files, config)
-```
-
-## Extractors
-
-### RiskExtractor
-
-Extract risk information from documents.
-
-```python
-from extractors.risk_extractor import RiskExtractor
-
-extractor = RiskExtractor(confidence_threshold=0.7)
-risks = extractor.extract_from_file("Risk Management Plan.md")
-```
-
-#### Methods
-
-##### extract_from_file()
-
-```python
-def extract_from_file(self, file_path: str) -> List[Risk]
-```
-
-Extract risks from a single file.
-
-**Parameters:**
-- `file_path` (str): Path to file to process
-
-**Returns:**
-- `List[Risk]`: List of extracted Risk objects
-
-##### extract_from_markdown()
-
-```python
-def extract_from_markdown(self, content: str) -> List[Risk]
-```
-
-Extract risks from Markdown content.
-
-**Parameters:**
-- `content` (str): Markdown content to process
-
-**Returns:**
-- `List[Risk]`: List of extracted Risk objects
-
-##### extract_from_excel()
-
-```python
-def extract_from_excel(self, file_path: str, sheet_name: Optional[str] = None) -> List[Risk]
-```
-
-Extract risks from Excel file.
-
-**Parameters:**
-- `file_path` (str): Path to Excel file
-- `sheet_name` (str, optional): Sheet name to process
-
-**Returns:**
-- `List[Risk]`: List of extracted Risk objects
-
-### DeliverableExtractor
-
-Extract deliverable information from WBS documents.
-
-```python
-from extractors.deliverable_extractor import DeliverableExtractor
-
-extractor = DeliverableExtractor()
-deliverables = extractor.extract_from_file("Work Breakdown Structure.md")
-```
-
-### MilestoneExtractor
-
-Extract milestone information from roadmap and schedule documents.
-
-```python
-from extractors.milestone_extractor import MilestoneExtractor
-
-extractor = MilestoneExtractor()
-milestones = extractor.extract_from_file("Project Roadmap.md")
-```
-
-### StakeholderExtractor
-
-Extract stakeholder information from stakeholder registers.
-
-```python
-from extractors.stakeholder_extractor import StakeholderExtractor
-
-extractor = StakeholderExtractor()
-stakeholders = extractor.extract_from_file("Stakeholder_Register.xlsx")
-```
+Processor for learning content delivery.
 
 ## Reporters
 
@@ -541,268 +364,142 @@ stakeholders = extractor.extract_from_file("Stakeholder_Register.xlsx")
 
 Abstract base class for all reporters.
 
-```python
-from reporters.base_reporter import BaseReporter
+#### Methods
 
-class CustomReporter(BaseReporter):
-    def generate_report(self, data: Dict[str, Any], output_path: str) -> bool:
-        # Implementation
-        pass
-    
-    def get_file_extension(self) -> str:
-        return ".custom"
+##### generate()
+
+Generate report.
+
+```python
+reporter.generate(data, output_path)
 ```
 
 ### MarkdownReporter
 
-Generate Markdown reports.
-
-```python
-from reporters.markdown_reporter import MarkdownReporter
-
-reporter = MarkdownReporter()
-success = reporter.generate_report(data, "report.md")
-```
+Reporter for Markdown format.
 
 ### ExcelReporter
 
-Generate Excel reports.
+Reporter for Excel format.
 
-```python
-from reporters.excel_reporter import ExcelReporter
+## File Handlers
 
-reporter = ExcelReporter()
-success = reporter.generate_report(data, "report.xlsx")
-```
+### BaseHandler
 
-## Configuration
-
-### ConfigManager
-
-Manage configuration loading and validation.
-
-```python
-from core.config_manager import ConfigManager
-
-config_manager = ConfigManager("config.yaml")
-config = config_manager.get_config()
-```
+Abstract base class for all file handlers.
 
 #### Methods
 
-##### get_config()
+##### can_handle()
+
+Check if handler can process file.
 
 ```python
-def get_config(self) -> Dict[str, Any]
+can_process = handler.can_handle(file_path)
 ```
 
-Get the loaded configuration.
+##### extract_data()
 
-**Returns:**
-- `Dict[str, Any]`: Configuration dictionary
-
-##### validate_config()
+Extract data from file.
 
 ```python
-def validate_config(self, config: Dict[str, Any]) -> bool
+data = handler.extract_data(file_path)
 ```
 
-Validate configuration structure and values.
+### MarkdownHandler
 
-**Parameters:**
-- `config` (Dict[str, Any]): Configuration to validate
+Handler for Markdown files.
 
-**Returns:**
-- `bool`: True if configuration is valid
+### ExcelHandler
 
-**Raises:**
-- `ConfigurationError`: If configuration is invalid
+Handler for Excel files.
 
-##### get_required_documents()
+### MppHandler
 
-```python
-def get_required_documents(self) -> List[Dict[str, Any]]
+Handler for Microsoft Project files.
+
+## Configuration
+
+### Configuration Options
+
+The tool is configured using a YAML file with the following sections:
+
+#### project
+
+Project metadata and settings.
+
+```yaml
+project:
+  name: "Example Project"
+  default_path: "./sample_project"
+  description: "Project description"
+  owner: "Project Manager"
 ```
 
-Get list of required documents from configuration.
+#### avatar
 
-**Returns:**
-- `List[Dict[str, Any]]`: List of required document configurations
+Avatar assistant settings.
 
-## Utilities
-
-### Logger
-
-Centralized logging utilities.
-
-```python
-from utils.logger import get_logger
-
-logger = get_logger(__name__)
-logger.info("Processing started")
-logger.error("An error occurred", exc_info=True)
+```yaml
+avatar:
+  enabled: true
+  provider: "did"
+  did:
+    api_key: "your-did-api-key"
+    avatar_id: "default"
+    voice_id: "en-US-JennyNeural"
+  heygen:
+    api_key: "your-heygen-api-key"
+    avatar_id: "default"
+    voice_id: "en-US-JennyNeural"
+  greeting: "Hello! How can I help you?"
 ```
 
-### Validators
+#### required_documents
 
-Input validation utilities.
+Document requirements configuration.
 
-```python
-from utils.validators import validate_file_path, validate_date_string
-
-# Validate file path
-is_valid = validate_file_path("/path/to/file.md")
-
-# Validate date string
-date_obj = validate_date_string("2024-01-15")
+```yaml
+required_documents:
+  - name: "Project Charter"
+    patterns: ["*charter*"]
+    formats: ["md", "docx"]
+    required: true
 ```
 
-#### Functions
+#### modes
 
-##### validate_file_path()
+Operation mode settings.
 
-```python
-def validate_file_path(file_path: str) -> bool
+```yaml
+modes:
+  document_check:
+    enabled: true
+    output_formats: ["markdown", "console"]
+  status_analysis:
+    enabled: true
+    output_formats: ["markdown", "excel"]
+  learning_module:
+    enabled: true
 ```
 
-Validate that file path exists and is readable.
+#### output
 
-##### validate_date_string()
+Output settings.
 
-```python
-def validate_date_string(date_str: str) -> Optional[datetime]
+```yaml
+output:
+  directory: "./reports"
+  timestamp_files: true
 ```
 
-Parse and validate date string.
+#### logging
 
-##### validate_probability()
+Logging configuration.
 
-```python
-def validate_probability(probability: str) -> bool
+```yaml
+logging:
+  level: "INFO"
+  file: "pm_analysis.log"
+  console: true
 ```
-
-Validate probability value (High, Medium, Low, or numeric).
-
-## Error Handling
-
-### Exception Hierarchy
-
-```python
-from utils.exceptions import (
-    PMAnalysisError,
-    ConfigurationError,
-    FileProcessingError,
-    DataExtractionError,
-    ValidationError
-)
-
-try:
-    result = engine.run()
-except ConfigurationError as e:
-    print(f"Configuration error: {e}")
-except FileProcessingError as e:
-    print(f"File processing error: {e}")
-except PMAnalysisError as e:
-    print(f"General analysis error: {e}")
-```
-
-### Custom Exceptions
-
-#### PMAnalysisError
-
-Base exception for all PM Analysis Tool errors.
-
-#### ConfigurationError
-
-Raised when configuration is invalid or missing.
-
-#### FileProcessingError
-
-Raised when file processing fails.
-
-#### DataExtractionError
-
-Raised when data extraction fails.
-
-#### ValidationError
-
-Raised when input validation fails.
-
-## Examples
-
-### Basic Usage
-
-```python
-from core.engine import PMAnalysisEngine
-from core.models import OperationMode
-
-# Initialize engine
-engine = PMAnalysisEngine("config.yaml")
-
-# Run analysis
-result = engine.run(
-    mode=OperationMode.STATUS_ANALYSIS,
-    project_path="./my-project",
-    output_formats=["markdown", "excel"]
-)
-
-# Check results
-if result.success:
-    print("Analysis completed successfully")
-    print(f"Execution time: {result.execution_time:.2f} seconds")
-else:
-    print("Analysis failed:")
-    for error in result.errors:
-        print(f"  - {error}")
-```
-
-### Custom File Handler
-
-```python
-from file_handlers.base_handler import BaseFileHandler
-from core.models import ValidationResult
-
-class JSONHandler(BaseFileHandler):
-    """Handler for JSON files."""
-    
-    def can_handle(self, file_path: str) -> bool:
-        return file_path.lower().endswith('.json')
-    
-    def extract_data(self, file_path: str) -> Dict[str, Any]:
-        import json
-        with open(file_path, 'r') as f:
-            return json.load(f)
-    
-    def validate_structure(self, file_path: str) -> ValidationResult:
-        try:
-            self.extract_data(file_path)
-            return ValidationResult(success=True, messages=[])
-        except Exception as e:
-            return ValidationResult(success=False, messages=[str(e)])
-```
-
-### Custom Extractor
-
-```python
-from extractors.base_extractor import BaseExtractor
-from core.domain import CustomEntity
-
-class CustomExtractor(BaseExtractor):
-    """Extract custom entities from documents."""
-    
-    def extract_from_file(self, file_path: str) -> List[CustomEntity]:
-        # Implementation
-        entities = []
-        # ... extraction logic ...
-        return entities
-    
-    def extract_from_content(self, content: str) -> List[CustomEntity]:
-        # Implementation
-        entities = []
-        # ... extraction logic ...
-        return entities
-```
-
----
-
-This API reference provides comprehensive documentation for extending and using the PM Analysis Tool programmatically. For more examples and detailed usage scenarios, refer to the test files and example implementations in the codebase.
